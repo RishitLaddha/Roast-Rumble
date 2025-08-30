@@ -6,3 +6,11 @@ __pycache__/
 *.pem
 *.zip
 static/outputs/
+.venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.zip
+*.pem
+static/outputs/
