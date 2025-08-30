@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Roast Rumble • Pixel Arcade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Pixel fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <style>
+    :root {
+      --primary: #ff2e63;
+      --secondary: #08f7fe;
+      --meterL: #ff2e63;
+      --meterR: #08f7fe;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white font-press">
+  <div class="max-w-6xl mx-auto p-4">
+    <h1 class="text-2xl md:text-4xl text-center mb-6 neon">ROAST RUMBLE</h1>
+
+    <!-- Selectors -->
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <!-- Personas A -->
+      <div class="p-3 pixel-card">
+        <h2 class="text-lg mb-2">Player A</h2>
+        <div id="gridA" class="grid grid-cols-3 gap-2 max-h-64 overflow-auto">
+          {% for pid, p in personas.items() %}
+          <button class="avatar-btn" data-side="A" data-id="{{ pid }}">
+            <img src="{{ p.avatar }}" onerror="this.src='/static/avatars/_placeholder.png'" alt="{{ p.name }}">
+            <span>{{ p.name }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Themes -->
+      <div class="p-3 pixel-card">
+        <h2 class="text-lg mb-2">Arena</h2>
+        <div id="gridTheme" class="grid grid-cols-3 gap-2">
+          {% for tid, t in themes.items() %}
+          <button class="theme-btn" data-id="{{ tid }}" data-name="{{ t.name }}" data-bg="{{ t.bg }}"
+                  data-primary="{{ t.palette.primary }}" data-secondary="{{ t.palette.secondary }}"
+                  data-meterl="{{ t.palette.meterL }}" data-meterr="{{ t.palette.meterR }}">
+            <img src="{{ t.bg }}" onerror="this.src='https://picsum.photos/300/200?random={{loop.index}}'" alt="{{ t.name }}">
+            <span>{{ t.name }}</span>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="mt-3">
+          <label class="block text-sm mb-1">Style</label>
+          <select id="styleSel" class="pixel-input w-full">
+            <option value="one-liner">One-liner (max 40 words)</option>
+            <option value="two-liner">Two-liner (max 60 words)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Personas B -->
+      <div class="p-3 pixel-card">
+        <h2 class="text-lg mb-2">Player B</h2>
+        <div id="gridB" class="grid grid-cols-3 gap-2 max-h-64 overflow-auto">
+          {% for pid, p in personas.items() %}
+          <button class="avatar-btn" data-side="B" data-id="{{ pid }}">
+            <img src="{{ p.avatar }}" onerror="this.src='/static/avatars/_placeholder.png'" alt="{{ p.name }}">
+            <span>{{ p.name }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage -->
+    <div id="stage" class="stage pixel-border relative overflow-hidden">
+      <!-- Arena background -->
+      <img id="arenaBg" class="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none" src="" alt="">
+
+      <!-- Cornered avatar plates + names -->
+      <div id="plateA" class="avatar-plate plate-left-bottom">
+        <img id="avatarA" src="/static/avatars/_placeholder.png" alt="A">
+      </div>
+      <span id="nameA" class="name-chip name-left-bottom"></span>
+
+      <div id="plateB" class="avatar-plate plate-right-top">
+        <img id="avatarB" src="/static/avatars/_placeholder.png" alt="B">
+      </div>
+      <span id="nameB" class="name-chip name-right-top"></span>
+
+      <!-- Single dialog bar -->
+      <div id="dialogBar" class="dialog-bar hidden">
+        <span id="dialogSpeaker" class="text-accent"></span>
+        <span id="dialogText"></span>
+      </div>
+
+      <!-- Meter -->
+      <div class="meter-wrap">
+        <div id="meterBar" class="meter-bar"></div>
+        <div class="meter-labels">
+          <span>A</span><span>B</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap items-center gap-3 mt-4">
+      <button id="startBtn" class="pixel-btn">Start Battle</button>
+      <button id="nextBtn" class="pixel-btn hidden">Next ▶</button>
+      <span id="status" class="text-xs opacity-80"></span>
+      <span class="ml-auto text-xs opacity-60">Tip: pick two bots & an arena first.</span>
+    </div>
+  </div>
+
+  <script>
+    const personas = {{ personas|tojson }};
+    const themes   = {{ themes|tojson }};
+
+    let selA=null, selB=null, selT=null;
+    let battleQueue = [];  // sequence of {speaker:'A'|'B', text, meter_after?}
+    let stepIndex = 0;
+
+    // Persona selection
+    document.querySelectorAll('.avatar-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const side = btn.dataset.side;
+        const id = btn.dataset.id;
+        if(side==='A') selA = id; else selB = id;
+        btn.closest('#grid'+side).querySelectorAll('.avatar-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const p = personas[id];
+        if (side==='A') {
+          document.querySelector('#plateA img').src = p.avatar;
+          document.getElementById('nameA').textContent = p.name;
+        } else {
+          document.querySelector('#plateB img').src = p.avatar;
+          document.getElementById('nameB').textContent = p.name;
+        }
+      });
+    });
+
+    // Theme selection
+    document.querySelectorAll('.theme-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        selT = btn.dataset.id;
+        document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        // apply palette + bg
+        document.querySelector(':root').style.setProperty('--primary', btn.dataset.primary);
+        document.querySelector(':root').style.setProperty('--secondary', btn.dataset.secondary);
+        document.querySelector(':root').style.setProperty('--meterL', btn.dataset.meterl);
+        document.querySelector(':root').style.setProperty('--meterR', btn.dataset.meterr);
+        document.getElementById('arenaBg').src = btn.dataset.bg;
+      });
+    });
+
+    function setStatus(t){ document.getElementById('status').textContent = t; }
+
+    function animMeter(m){
+      // m in [-1..+1] displayed as 0..100%
+      const pct = Math.max(0, Math.min(100, Math.round((m+1)*50)));
+      document.getElementById('meterBar').style.left = pct+'%';
+    }
+
+    function showThinking(speaker) {
+      const dialog = document.getElementById('dialogBar');
+      dialog.classList.remove('hidden');
+      document.getElementById('dialogSpeaker').textContent =
+        (speaker==='A'? (personas[selA].name) : (personas[selB].name)) + ':';
+      document.getElementById('dialogText').textContent = ' 🤔 thinking…';
+    }
+
+    function showLine(item) {
+      const dialog = document.getElementById('dialogBar');
+      dialog.classList.remove('hidden');
+      document.getElementById('dialogSpeaker').textContent =
+        (item.speaker==='A'? (personas[selA].name) : (personas[selB].name)) + ':';
+      document.getElementById('dialogText').textContent = ' ' + item.text;
+      if (typeof item.meter_after === 'number') animMeter(item.meter_after);
+      // pulse effect
+      dialog.classList.remove('pop');
+      void dialog.offsetWidth; // reflow
+      dialog.classList.add('pop');
+    }
+
+    async function runNextStep() {
+      if (stepIndex >= battleQueue.length) {
+        setStatus(`Winner: ${window._winnerLabel}`);
+        document.getElementById('nextBtn').classList.add('hidden');
+        return;
+      }
+      const item = battleQueue[stepIndex];
+
+      // Optional 3s “thinking…”
+      showThinking(item.speaker);
+      await new Promise(r=>setTimeout(r, 3000));
+
+      // Reveal line
+      showLine(item);
+      stepIndex += 1;
+    }
+
+    async function startBattle(){
+      if(!selA||!selB||!selT){ setStatus('Pick Player A, Player B, and an Arena.'); return; }
+      setStatus('Summoning burns...');
+      animMeter(0);
+      stepIndex = 0;
+      battleQueue = [];
+      document.getElementById('nextBtn').classList.add('hidden');
+      document.getElementById('dialogBar').classList.add('hidden');
+
+      const style = document.getElementById('styleSel').value;
+
+      const res = await fetch('/api/start',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          persona_a_id: selA,
+          persona_b_id: selB,
+          theme_id: selT,
+          rounds: 3,
+          style
+        })
+      });
+      const data = await res.json();
+      if(data.error){ setStatus(data.error); return; }
+
+      // Build queue: A line, then B line, per round
+      const events = data.events || [];
+      events.forEach(ev=>{
+        battleQueue.push({speaker:'A', text: ev.a_line});
+        battleQueue.push({speaker:'B', text: ev.b_line, meter_after: ev.meter_after});
+      });
+
+      window._winnerLabel = (data.winner === 'Draw' ? 'Draw'
+                        : (data.winner==='A' ? (personas[selA].name) : (personas[selB].name)));
+
+      setStatus('Fight!');
+      document.getElementById('nextBtn').classList.remove('hidden');
+
+      // Kick off first step immediately (optional)
+      runNextStep();
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startBattle);
+    document.getElementById('nextBtn').addEventListener('click', runNextStep);
+  </script>
+</body>
+</html>

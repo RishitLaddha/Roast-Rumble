@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Results • Roast Rumble</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <style>
+    .chip-icon{ image-rendering: pixelated; }
+  </style>
+</head>
+
+<body class="page-results crt font-press">
+  <!-- CRT scanlines -->
+  <div class="scanlines"></div>
+
+  <main class="wrap">
+    <h1 class="neon-title">RESULTS</h1>
+
+    <!-- Scoreboard / K.O. -->
+    <section class="rr-card pixel-frame" style="background-image:url('{{ theme_bg }}')">
+      <div class="rr-overlay"></div>
+
+      <div class="rr-top">
+        <span class="rr-ko">K.O.</span>
+        <span class="chip">Arena: {{ arena }}</span>
+      </div>
+
+      <div class="rr-winner badge-8">
+        <img class="chip-icon" width="22" height="22" src="{{ final_winner_avatar }}" alt="winner">
+        <span>Winner — <strong>{{ final_winner_name }}</strong></span>
+      </div>
+
+      <div class="rr-scorebar">
+        <!-- Left (A) -->
+        <div class="rr-side rr-left">
+          <div class="rr-side-head">
+            <img class="rr-avatar" src="{{ a_avatar }}" alt="{{ a_name }}">
+            <span class="rr-side-tag">A</span>
+            <span class="rr-name">{{ a_name }}</span>
+          </div>
+          <div class="rr-num rr-num-left">{{ a_score }}</div>
+        </div>
+
+        <div class="rr-vs">VS</div>
+
+        <!-- Right (B) -->
+        <div class="rr-side rr-right">
+          <div class="rr-side-head">
+            <span class="rr-name right">{{ b_name }}</span>
+            <span class="rr-side-tag">B</span>
+            <img class="rr-avatar" src="{{ b_avatar }}" alt="{{ b_name }}">
+          </div>
+          <div class="rr-num rr-num-right">{{ b_score }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Round Breakdown -->
+    <section>
+      <h2 class="rr-subtitle">Round Breakdown</h2>
+
+      {% for r in rows %}
+        {% set round_winner_name = (a_name if r.meter_after <= 0 else b_name) %}
+        {% set pct = ((r.meter_after + 1.0) / 2.0) * 100.0 %}
+        <details class="rr-round">
+          <summary>
+            <span>Round {{ r.round }}</span>
+            <span class="chip small">Winner: {{ round_winner_name }}</span>
+          </summary>
+
+          <div class="rr-meter">
+            <div class="rr-meter-label">{{ a_name }}</div>
+            <div class="rr-meter-bar">
+              <div class="rr-meter-fill" style="--pct: {{ '%.3f' % pct }}%"></div>
+              <div class="rr-meter-mid"></div>
+            </div>
+            <div class="rr-meter-label" style="text-align:right">{{ b_name }}</div>
+          </div>
+
+          <div class="rr-lines">
+            <div class="rr-line a">
+              <span class="who">{{ a_name }}</span>
+              <span class="text">{{ r.a_line }}</span>
+            </div>
+            <div class="rr-line b">
+              <span class="who">{{ b_name }}</span>
+              <span class="text">{{ r.b_line }}</span>
+            </div>
+          </div>
+        </details>
+      {% endfor %}
+    </section>
+
+    <div class="center">
+      <a class="btn big" href="{{ url_for('disclaimer') }}">Play Again</a>
+    </div>
+  </main>
+</body>
+</html>

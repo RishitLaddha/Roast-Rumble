@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Select Fighters • Roast Rumble</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-slate-950 text-white font-press">
+  <div class="max-w-6xl mx-auto p-4">
+    <h1 class="text-center text-2xl neon mb-4">PLAYER SELECT</h1>
+
+    <form method="POST" action="{{ url_for('save_players') }}">
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Left: Player A -->
+        <div class="pixel-card p-3">
+          <h2 class="mb-3">Left Corner (Player A)</h2>
+
+          <!-- Tighter, denser grid on desktop -->
+          <div id="gridA" class="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-3">
+            {% for pid, p in personas.items() %}
+            <label class="avatar-btn cursor-pointer">
+              <input type="radio" name="player_a" value="{{ pid }}" class="hidden peer">
+              <img src="{{ p.avatar }}" onerror="this.src='/static/avatars/_placeholder.png'" alt="{{ p.name }}">
+              <span class="name-wrap peer-checked:text-pink-400">{{ p.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Right: Player B -->
+        <div class="pixel-card p-3">
+          <h2 class="mb-3">Right Corner (Player B)</h2>
+
+          <div id="gridB" class="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-3">
+            {% for pid, p in personas.items() %}
+            <label class="avatar-btn cursor-pointer">
+              <input type="radio" name="player_b" value="{{ pid }}" class="hidden peer">
+              <img src="{{ p.avatar }}" onerror="this.src='/static/avatars/_placeholder.png'" alt="{{ p.name }}">
+              <span class="name-wrap peer-checked:text-cyan-400">{{ p.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex items-center gap-3">
+        <button id="nextBtn" class="pixel-btn opacity-50 pointer-events-none">Next ▶</button>
+        <span class="text-xs opacity-70">Pick two <em>different</em> fighters.</span>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const aRadios = Array.from(document.querySelectorAll('input[name="player_a"]'));
+    const bRadios = Array.from(document.querySelectorAll('input[name="player_b"]'));
+    const nextBtn = document.getElementById('nextBtn');
+
+    function validate() {
+      const a = aRadios.find(r=>r.checked)?.value;
+      const b = bRadios.find(r=>r.checked)?.value;
+      const ok = a && b && a !== b;
+      nextBtn.classList.toggle('opacity-50', !ok);
+      nextBtn.classList.toggle('pointer-events-none', !ok);
+      return ok;
+    }
+    aRadios.concat(bRadios).forEach(r => r.addEventListener('change', validate));
+    document.querySelector('form').addEventListener('submit', (e)=>{
+      if(!validate()) e.preventDefault();
+    });
+  </script>
+</body>
+</html>

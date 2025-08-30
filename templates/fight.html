@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fight! • Roast Rumble</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <style>
+    :root {
+      --primary: {{ theme.palette.primary }};
+      --secondary: {{ theme.palette.secondary }};
+      --meterL: {{ theme.palette.meterL }};
+      --meterR: {{ theme.palette.meterR }};
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white font-press">
+  <div class="max-w-6xl mx-auto p-4">
+    <h1 class="text-center text-2xl neon mb-3">{{ theme.display_name }}</h1>
+
+    <div id="stage" class="stage pixel-border relative overflow-hidden">
+      <img class="absolute inset-0 w-full h-full object-cover opacity-60" src="{{ theme.bg }}" alt="">
+
+      <!-- corner plates (z-index:2) -->
+      <div class="avatar-plate plate-left-bottom"><img src="{{ a.avatar }}" alt="{{ a.name }}"></div>
+      <span class="name-chip name-left-bottom">{{ a.name }}</span>
+
+      <div class="avatar-plate plate-right-top"><img src="{{ b.avatar }}" alt="{{ b.name }}"></div>
+      <span class="name-chip name-right-top">{{ b.name }}</span>
+
+      <!-- centered dialog (z-index:4) — never overlaps plates -->
+      <div id="arenaDialog" class="arena-dialog hidden">
+        <span id="dialogSpeaker" class="text-accent"></span>
+        <span id="dialogText"></span>
+      </div>
+
+      <!-- KO popup -->
+      <div id="koPopup" class="ko hidden">K.O.</div>
+
+      <!-- meter (z-index:1) -->
+      <div class="meter-wrap"><div id="meterBar" class="meter-bar"></div></div>
+    </div>
+
+    <div class="flex items-center gap-3 mt-4">
+      <button id="nextBtn" class="pixel-btn hidden">Next ▶</button>
+      <span id="status" class="text-xs opacity-80"></span>
+    </div>
+  </div>
+
+  <script>
+    const a_id = "{{ a_id }}";
+    const b_id = "{{ b_id }}";
+    const t_id = "{{ t_id }}";
+    let queue = [], i = 0;
+
+    function animMeter(m){
+      const pct = Math.max(0, Math.min(100, Math.round((m+1)*50)));
+      document.getElementById('meterBar').style.left = pct+'%';
+    }
+    function showThinking(name){
+      const box = document.getElementById('arenaDialog');
+      box.classList.remove('hidden');
+      document.getElementById('dialogSpeaker').textContent = name + ':';
+      document.getElementById('dialogText').textContent = ' 🤔 thinking…';
+    }
+    function showLine(speaker, text, meter_after){
+      const box = document.getElementById('arenaDialog');
+      box.classList.remove('hidden');
+      document.getElementById('dialogSpeaker').textContent = speaker + ':';
+      document.getElementById('dialogText').textContent = ' ' + text;
+      if (typeof meter_after === 'number') animMeter(meter_after);
+      box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+    }
+    async function step(){
+      if(i>=queue.length){
+        document.getElementById('arenaDialog').classList.add('hidden');
+        const ko = document.getElementById('koPopup');
+        ko.classList.remove('hidden'); ko.classList.add('pop');
+        document.getElementById('status').textContent = 'Battle complete.';
+        setTimeout(()=>{ window.location.href = "{{ url_for('results') }}"; }, 1200);
+        return;
+      }
+      const item = queue[i];
+      showThinking(item.s === 'A' ? "{{ a.name }}" : "{{ b.name }}");
+      await new Promise(r=>setTimeout(r, 1000));
+      showLine(item.s === 'A' ? "{{ a.name }}" : "{{ b.name }}", item.text, item.m);
+      i++;
+    }
+
+    (async function init(){
+      document.getElementById('status').textContent = 'Summoning burns...';
+      const res = await fetch("{{ url_for('api_start') }}", {
+        method:"POST",
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ persona_a_id: a_id, persona_b_id: b_id, theme_id: t_id, rounds: 3, style: "one-liner" })
+      });
+      const data = await res.json();
+      if(data.error){ document.getElementById('status').textContent = data.error; return; }
+
+      const evs = data.events || [];
+      evs.forEach(ev=>{
+        queue.push({s:'A', text: ev.a_line});
+        queue.push({s:'B', text: ev.b_line, m: ev.meter_after});
+      });
+
+      document.getElementById('status').textContent = 'Fight!';
+      const nb = document.getElementById('nextBtn');
+      nb.classList.remove('hidden');
+      nb.addEventListener('click', step);
+      step();
+    })();
+  </script>
+</body>
+</html>

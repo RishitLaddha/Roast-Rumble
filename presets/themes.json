@@ -1,0 +1,24 @@
+{
+    "wwe": {
+      "id": "wwe",
+      "name": "Pixelated WWE Ring",
+      "bg": "/static/themes/wwe/bg.png",
+      "bubble": "/static/themes/wwe/bubble.svg",
+      "palette": { "primary": "#ff2e63", "secondary": "#08f7fe", "meterL": "#ff2e63", "meterR": "#08f7fe" }
+    },
+    "kitchen": {
+      "id": "kitchen",
+      "name": "Pixelated Hell's Kitchen",
+      "bg": "/static/themes/kitchen/bg.png",
+      "bubble": "/static/themes/kitchen/bubble.svg",
+      "palette": { "primary": "#ff7b00", "secondary": "#ffd166", "meterL": "#ff7b00", "meterR": "#ffd166" }
+    },
+    "arkham": {
+      "id": "arkham",
+      "name": "Pixelated Arkham Asylum",
+      "bg": "/static/themes/arkham/bg.png",
+      "bubble": "/static/themes/arkham/bubble.svg",
+      "palette": { "primary": "#4b0082", "secondary": "#39ff14", "meterL": "#39ff14", "meterR": "#4b0082" }
+    }
+  }
+  

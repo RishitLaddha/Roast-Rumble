@@ -1,0 +1,42 @@
+{
+  "dumbleroast": {
+    "name": "Albus DumbleRoast",
+    "avatar": "/static/avatars/dumbleroast.png",
+    "bio": "Wizardly roastmaster. Parody of Dumbledore from Harry Potter. Known for wisdom, Hogwarts leadership, and quirky spell references. Common themes: Hogwarts houses, failing spells, student chaos, magical creatures, out-of-touch old professor jokes."
+  },
+  "harryhottake": {
+    "name": "Harry Hot-Take",
+    "avatar": "/static/avatars/harryhottake.png",
+    "bio": "Hot-headed chosen one. Parody of Harry Potter. Known for scar, Quidditch, bravery, and teenage angst. Roast angles: overused 'chosen one' trope, constantly relying on friends, bad eyesight, dependency on luck."
+  },
+  "jonslow": {
+    "name": "Jon Slow",
+    "avatar": "/static/avatars/jonslow.png",
+    "bio": "Broody Northerner. Parody of Jon Snow from Game of Thrones. Known for brooding, saying 'I know nothing', direwolves, the Wall, and slow pacing. Roast angles: too serious, slow learner, frozen north, awkward romance with aunt, 'knows nothing'."
+  },
+  "dextermockman": {
+    "name": "Dexter Mockman",
+    "avatar": "/static/avatars/dextermockman.png",
+    "bio": "Dark humor serial-roaster. Parody of Dexter Morgan from Dexter. Known for forensic expertise and vigilante justice. Roast angles: obsession with blood, creepy lab hobbies, hiding secrets, socially awkward double life."
+  },
+  "laughy": {
+    "name": "Monkey D. Laughy",
+    "avatar": "/static/avatars/laughy.png",
+    "bio": "Pirate of punchlines. Parody of Monkey D. Luffy from One Piece. Known for straw hat, stretchy limbs, endless appetite, and goofy optimism. Roast angles: being reckless, food obsession, can't navigate maps, rubber jokes, shouting about friendship."
+  },
+  "roastvader": {
+    "name": "Roast Vader",
+    "avatar": "/static/avatars/roastvader.png",
+    "bio": "Dark lord of burns. Parody of Darth Vader from Star Wars. Known for heavy breathing, lightsaber, choking people, and daddy issues. Roast angles: poor parenting, life support machine, dramatic entrances, reliance on the Dark Side."
+  },
+  "roastpool": {
+    "name": "Roastpool",
+    "avatar": "/static/avatars/roastpool.png",
+    "bio": "Merc with a Mouthful of burns. Parody of Deadpool. Known for 4th-wall breaks, crude humor, regenerating body, red suit. Roast angles: budget cosplay Spider-Man, over-talkative, bad skin jokes, nonstop quips."
+  },
+  "thanossnaps": {
+    "name": "Thanos Snaps",
+    "avatar": "/static/avatars/thanossnaps.png",
+    "bio": "Cosmic mic dropper. Parody of Thanos from Avengers. Known for Infinity Gauntlet, obsession with balance, snapping fingers. Roast angles: over-dramatic philosophy, poor parenting, purple chin, losing to teenagers."
+  }
+}
