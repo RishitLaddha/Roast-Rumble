@@ -5,6 +5,11 @@ Welcome to **Roast Rumble** — a pixel-perfect web app that pits AI-powered par
 ![Roast Rumble preview](static/avatars/jonslow.png)
 
 ---
+## 🎥 Demo & Links
+
+📽️ [Watch the Demo on YouTube](https://youtu.be/qXEuIakupT4)  
+💻 [Check out the Medium post](https://medium.com/@rishitladdha02nov/why-roast-if-not-to-rumble-19b04030abf0)
+---
 
 ## 🎯 Why this exists (and why it's actually hilarious)
 
